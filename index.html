@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Task Card</title>
+<style>
+    :root {
+    --bg: #f4f6f8;
+    --card:orange;
+    --text:hsl(0, 3%, 6%);
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --high: #ef4444;
+    --medium: #f59e0b;
+    --low: #10b981;
+    --done: #10b981;
+    }
+
+    * { box-sizing: border-box;
+    }
+
+    body {
+    margin: 0;
+    margin-top: 150px;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    }
+
+    article {
+    background: var(--card);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    }
+
+    h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    }
+
+    .completed h3 {
+    text-decoration: line-through;
+    color: var(--muted);
+    }
+
+    .badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    }
+
+    .priority-high { background: #fee2e2; color: var(--high); }
+    .status { background: #e0f2fe; color: #0369a1; }
+
+    .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    }
+
+    p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    }
+
+    .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    }
+
+    .tag {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #eef2ff;
+    font-size: 0.75rem;
+    }
+
+    .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    }
+
+    button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 6px 8px;
+    border-radius: 6px;
+    outline-color: #e0f2fe;
+    }
+
+    button:focus {
+    outline: 2px solid #3b82f6;
+    }
+
+    .actions {
+    display: flex;
+    gap: 8px;
+    }
+
+    label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<article data-testid="test-todo-card" id="card">
+<div class="header">
+    <h3 data-testid="test-todo-title" id="title">TASK: Design Landing Page</h3>
+    <span class="badge priority-high" data-testid="test-todo-priority" aria-label="High priority">High</span>
+</div>
+
+<p data-testid="test-todo-description">Create a modern responsive landing page for the product launch.</p>
+
+<div class="meta">
+    <span class="badge status" data-testid="test-todo-status">Pending</span>
+</div>
+
+<time data-testid="test-todo-due-date" datetime="2026-04-01T18:00:00Z">Due: April 1, 2026</time>
+<div data-testid="test-todo-time-remaining" id="timeRemaining" aria-live="polite"></div>
+
+<div class="tags" data-testid="test-todo-tags">
+    <span class="tag" data-testid="test-todo-tag-work">work</span>
+    <span class="tag" data-testid="test-todo-tag-urgent">urgent</span>
+    <span class="tag">design</span>
+</div>
+
+<div class="footer">
+    <label>
+    <input type="checkbox" data-testid="test-todo-complete-toggle" id="checkbox" />
+    Mark as done
+    </label>
+
+    <div class="actions">
+    <button data-testid="test-todo-edit-button" aria-label="Edit task">Edit</button>
+    <button data-testid="test-todo-delete-button" aria-label="Delete task">Delete</button>
+    </div>
+</div>
+</article>
+
+<script>
+const dueDate = new Date("2026-04-01T18:00:00Z");
+const timeEl = document.getElementById("timeRemaining");
+const checkbox = document.getElementById("checkbox");
+const card = document.getElementById("card");
+const status = document.querySelector('[data-testid="test-todo-status"]');
+
+function updateTime() {
+    const now = new Date();
+    const diff = dueDate - now;
+
+    if (Math.abs(diff) < 60000) {
+    timeEl.textContent = "Due now!";
+    return;
+    }
+
+    const minutes = Math.floor(Math.abs(diff) / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (diff > 0) {
+    if (days > 0) timeEl.textContent = `Due in ${days} day(s)`;
+    else if (hours > 0) timeEl.textContent = `Due in ${hours} hour(s)`;
+    else timeEl.textContent = `Due in ${minutes} minute(s)`;
+    } else {
+    if (days > 0) timeEl.textContent = `Overdue by ${days} day(s)`;
+    else if (hours > 0) timeEl.textContent = `Overdue by ${hours} hour(s)`;
+    else timeEl.textContent = `Overdue by ${minutes} minute(s)`;
+    }
+}
+
+updateTime();
+setInterval(updateTime, 60000);
+
+checkbox.addEventListener("change", () => {
+    if (checkbox.checked) {
+    card.classList.add("completed");
+    status.textContent = "Done";
+    } else {
+    card.classList.remove("completed");
+    status.textContent = "Pending";
+    }
+});
+
+document.querySelector('[data-testid="test-todo-edit-button"]').onclick = () => {
+    console.log("edit clicked");
+};
+
+document.querySelector('[data-testid="test-todo-delete-button"]').onclick = () => {
+    alert("Delete clicked");
+};
+</script>
+
+</body>
+</html>
